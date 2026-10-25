@@ -1,12 +1,13 @@
 // import getCartItems
 import {clearProductsList, hideLoadMoreButton, renderModal, renderProducts, showNotFound} from './render-function'
-import {getCategories, getProductByID, getProducts, getProductsByID} from './products-api'
+import {getCategories, getProductByID, getProducts, getProductsByCategory, getProductsByID} from './products-api'
 import { renderCategories } from './render-function';
 import { checkCounter, checkVisibilityLoadMoreButton, showToast } from './helpers';
 import { openModal } from './modal';
 import { deleteItemFromStorage, getFromStorage, getFromStorageByID, saveToStorage } from './storage';
 import { STORAGE_KEYS } from './constants';
 import refs from './refs';
+import { split } from 'postcss/lib/list';
 
 let currentPage = 1;
 let currentProductId = null;
@@ -46,6 +47,12 @@ export async function clickByProduct(event){
       refs.addToWishlistBtn.textContent= 'Remove from Wishlist'
  }else{
        refs.addToWishlistBtn.textContent = 'Add to Wishlist'
+
+ }
+ if( getFromStorageByID(STORAGE_KEYS.CART,id)){
+      refs.addToCartBtn.textContent= 'Remove from Cart'
+ }else{
+       refs.addToCartBtn.textContent = 'Add to Cart'
 
  }
 
@@ -112,3 +119,76 @@ export async function clickByProduct(event){
 
   }
     
+  export async function innitCartPage() {
+    clearProductsList()
+
+    const cartList = getFromStorage(STORAGE_KEYS.CART)
+    checkCounter()
+    try{
+
+      const products = await getProductsByID(cartList)
+
+      if (products.length === 0) {
+              // showToast('No products found', 'info');
+              showNotFound();
+              return;
+          }
+          renderProducts(products)
+
+          refs.cartItemsCount.textContent = cartList.length
+          const totalPrice = products.reduce((acc,product)=>acc+= product.price,0)
+        
+           refs.cartTotalPrice.textContent =  `$ ${totalPrice.toFixed(2)}`
+          if(totalPrice <= 50){
+            refs.cartShiping.textContent = '$ 10'
+ 
+          }else{
+            refs.cartShiping.textContent = 'Free'
+
+          }
+
+    }catch(error){
+  console.log(error)
+
+  showToast('Sumthing went wrong... Try aggen', "error")
+
+  }
+  }
+  export async function clickBtnBuy() {
+
+    // const amout =  + (!Number(refs.cartShiping.textContent.split(' ')[1]))? Number(refs.cartTotalPrice.textContent.split(' ')[1]) + Number(refs.cartShiping.textContent.split(' ')[1]):Number(refs.cartTotalPrice.textContent.split(' ')[1])
+
+    showToast(`Your sumarry order ${amout}`,'info')
+  }
+
+export async function  filtersCategorie(event) {
+  
+  const category = event.target.closest('.categories__btn')
+if(!category ) return 
+clearProductsList() 
+event.currentTarget.querySelectorAll('.categories__btn').forEach(btn=>{
+
+btn.classList.remove('categories__btn--active')
+}
+
+)
+event.target.classList.add('categories__btn--active')
+
+try{
+
+
+
+
+ const {products} =  await getProductsByCategory(category.textContent)
+    
+    renderProducts(products)
+
+  }catch(error){
+  console.log(error)
+
+  showToast('Sumthing went wrong... Try aggen', "error")
+
+  }
+
+
+}

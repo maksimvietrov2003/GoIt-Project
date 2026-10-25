@@ -24,6 +24,7 @@ export default {
   cartItemsCount: document.querySelector('[data-count]'),
   cartTotalPrice: document.querySelector('[data-price]'),
   buyProductsBtn: document.querySelector('.cart-summary__btn'),
+  cartShiping: document.querySelector('[data-shiping]'),
 
   loadMoreBtn: document.querySelector('.load-more-btn'),
   scrollToTopButton: document.querySelector('.scroll-top-btn'),

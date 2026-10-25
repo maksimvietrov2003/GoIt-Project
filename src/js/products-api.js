@@ -37,3 +37,4 @@ export async function getProductsByID(list) {
 return Promise.all(list.map((id)=> getProductByID(id)))
 
 }
+
